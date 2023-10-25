@@ -1,0 +1,84 @@
+import java.util.*;
+
+class Process {
+    int processID;
+    String processName;
+    int priority;
+
+    public Process(int processID, String processName, int priority) {
+        this.processID = processID;
+        this.processName = processName;
+        this.priority = priority;
+    }
+
+    public String toString() {
+        return "Process ID: " + processID + ", Process Name: " + processName + ", Priority: " + priority;
+    }
+}
+
+public class PriorityScheduler {
+    private List<Process> processes;
+    
+    public PriorityScheduler() {
+        processes = new ArrayList<>();
+    }
+
+    public void addProcess(int processID, String processName, int priority) {
+        Process process = new Process(processID, processName, priority);
+        processes.add(process);
+        heapifyUp(processes.size() - 1);
+    }
+
+    public Process getNextProcess() {
+        if (processes.isEmpty()) {
+            return null;
+        }
+
+        Process nextProcess = processes.get(0);
+        processes.set(0, processes.get(processes.size() - 1));
+        processes.remove(processes.size() - 1);
+        heapifyDown(0);
+        return nextProcess;
+    }
+
+    private void heapifyUp(int index) {
+        int parentIndex = (index - 1) / 2;
+        while (index > 0 && processes.get(index).priority < processes.get(parentIndex).priority) {
+            Collections.swap(processes, index, parentIndex);
+            index = parentIndex;
+            parentIndex = (index - 1) / 2;
+        }
+    }
+
+    private void heapifyDown(int index) {
+        int leftChildIndex = 2 * index + 1;
+        int rightChildIndex = 2 * index + 2;
+        int smallest = index;
+
+        if (leftChildIndex < processes.size() && processes.get(leftChildIndex).priority < processes.get(smallest).priority) {
+            smallest = leftChildIndex;
+        }
+
+        if (rightChildIndex < processes.size() && processes.get(rightChildIndex).priority < processes.get(smallest).priority) {
+            smallest = rightChildIndex;
+        }
+
+        if (smallest != index) {
+            Collections.swap(processes, index, smallest);
+            heapifyDown(smallest);
+        }
+    }
+
+    public static void main(String[] args) {
+        PriorityScheduler scheduler = new PriorityScheduler();
+        scheduler.addProcess(1, "Process A", 3);
+        scheduler.addProcess(2, "Process B", 1);
+        scheduler.addProcess(3, "Process C", 2);
+
+        Process nextProcess = scheduler.getNextProcess();
+        while (nextProcess != null) {
+            System.out.println("Scheduled: " + nextProcess);
+            nextProcess = scheduler.getNextProcess();
+        }
+    }
+}
